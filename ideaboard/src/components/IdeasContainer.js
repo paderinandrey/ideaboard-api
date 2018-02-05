@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
 import axios from 'axios'
+import update from 'immutability-helper'
+import Idea from './Idea'
 
 class IdeasContainer extends Component {
   constructor(props) {
@@ -18,17 +20,36 @@ class IdeasContainer extends Component {
     .catch(error => console.log(error))
   }
 
+  addNewIdea = () => {
+    axios.post(
+      'http://78.155.206.30:3005/api/v1/ideas',
+      { idea:
+        {
+          title: '',
+          body: ''
+        }
+      }
+    )
+    .then(response => {
+      console.log(response)
+      const ideas = update(this.state.ideas, {
+        $splice: [[0, 0, response.data]]
+      })
+      this.setState({ideas: ideas})
+    })
+    .catch(error => console.log(error))
+  }
+
   render() {
     return (
       <div>
         {this.state.ideas.map((idea) => {
-          return(
-            <div className="title" key={idea.id} >
-              <h4>{idea.title}</h4>
-              <p>{idea.body}</p>
-            </div>
-          )
+          return (<Idea idea={idea} key={idea.id} />)
         })}
+        <button className="newIdeaButton"
+          onClick={this.addNewIdea} >
+          New Idea
+        </button>
       </div>
     );
   }
